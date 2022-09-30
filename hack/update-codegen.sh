@@ -18,15 +18,15 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-source $(dirname $0)/../vendor/github.com/knative/test-infra/scripts/library.sh
+source $(dirname $0)/../vendor/knative.dev/hack/codegen-library.sh
 
 CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${REPO_ROOT_DIR}; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
 
 # Only deepcopy the Duck types, as they are not real resources.
 ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
-  github.com/mattmoor/cachier/pkg/client github.com/mattmoor/cachier/pkg/apis \
+  github.com/tamalsaha/cachier/pkg/client github.com/tamalsaha/cachier/pkg/apis \
   "podspec:v1alpha1" \
   --go-header-file ${REPO_ROOT_DIR}/hack/boilerplate.go.txt
 
 # Make sure our dependencies are up-to-date
-${REPO_ROOT_DIR}/hack/update-deps.sh
+# ${REPO_ROOT_DIR}/hack/update-deps.sh

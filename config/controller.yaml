@@ -15,7 +15,7 @@ spec:
       serviceAccountName: cachier-controller
       containers:
       - name: cachier-controller
-        image: github.com/mattmoor/cachier/cmd/controller
+        image: github.com/tamalsaha/cachier/cmd/controller
         args:
         - "-logtostderr=true"
         - "-stderrthreshold=INFO"

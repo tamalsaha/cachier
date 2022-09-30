@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: cachier-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cachier-controller-admin
@@ -17,7 +17,7 @@ subjects:
   name: cachier-controller
   namespace: cachier-system
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
@@ -26,6 +26,9 @@ metadata:
   namespace: cachier-system
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: cachier-controller
   template:
     metadata:
       labels:

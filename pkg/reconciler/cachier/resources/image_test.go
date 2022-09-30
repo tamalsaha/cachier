@@ -21,12 +21,12 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	caching "github.com/knative/caching/pkg/apis/caching/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	caching "knative.dev/caching/pkg/apis/caching/v1alpha1"
 
-	"github.com/mattmoor/cachier/pkg/apis/podspec/v1alpha1"
+	"github.com/tamalsaha/cachier/pkg/apis/podspec/v1alpha1"
 )
 
 func TestMakeImages(t *testing.T) {

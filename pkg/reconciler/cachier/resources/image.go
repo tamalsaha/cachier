@@ -19,11 +19,11 @@ package resources
 import (
 	"fmt"
 
-	caching "github.com/knative/caching/pkg/apis/caching/v1alpha1"
-	"github.com/knative/pkg/kmeta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	caching "knative.dev/caching/pkg/apis/caching/v1alpha1"
+	"knative.dev/pkg/kmeta"
 
-	"github.com/mattmoor/cachier/pkg/apis/podspec/v1alpha1"
+	"github.com/tamalsaha/cachier/pkg/apis/podspec/v1alpha1"
 )
 
 func MakeImages(ps *v1alpha1.WithPod) map[string]caching.Image {

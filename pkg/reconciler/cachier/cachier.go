@@ -21,15 +21,6 @@ import (
 	"sort"
 	"strings"
 
-	// caching "github.com/knative/caching/pkg/apis/caching/v1alpha1"
-	cachingclientset "github.com/knative/caching/pkg/client/clientset/versioned"
-	cachinginformers "github.com/knative/caching/pkg/client/informers/externalversions/caching/v1alpha1"
-	cachinglisters "github.com/knative/caching/pkg/client/listers/caching/v1alpha1"
-	"github.com/knative/pkg/apis/duck"
-	"github.com/knative/pkg/controller"
-	"github.com/knative/pkg/kmeta"
-	"github.com/knative/pkg/logging"
-	"github.com/knative/pkg/logging/logkey"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -37,9 +28,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
+	// caching "knative.dev/caching/pkg/apis/caching/v1alpha1"
+	cachingclientset "knative.dev/caching/pkg/client/clientset/versioned"
+	cachinginformers "knative.dev/caching/pkg/client/informers/externalversions/caching/v1alpha1"
+	cachinglisters "knative.dev/caching/pkg/client/listers/caching/v1alpha1"
+	"knative.dev/pkg/apis/duck"
+	"knative.dev/pkg/controller"
+	"knative.dev/pkg/kmeta"
+	"knative.dev/pkg/logging"
+	"knative.dev/pkg/logging/logkey"
 
-	"github.com/mattmoor/cachier/pkg/apis/podspec/v1alpha1"
-	"github.com/mattmoor/cachier/pkg/reconciler/cachier/resources"
+	"github.com/tamalsaha/cachier/pkg/apis/podspec/v1alpha1"
+	"github.com/tamalsaha/cachier/pkg/reconciler/cachier/resources"
 )
 
 const controllerAgentName = "cachier-controller"
@@ -80,7 +80,7 @@ func NewController(
 	gvr, _ := meta.UnsafeGuessKindToResource(gvk)
 
 	// Get an informer / lister pair for this resource group.
-	informer, lister, err := psif.Get(gvr)
+	informer, lister, err := psif.Get(context.TODO(), gvr)
 	if err != nil {
 		logger.Fatalf("Error building informer for %v: %v", gvr, err)
 	}
@@ -93,7 +93,11 @@ func NewController(
 		Logger: logger.Named(controllerAgentName).
 			With(zap.String(logkey.ControllerType, controllerAgentName)),
 	}
-	impl := controller.NewImpl(r, r.Logger, gvr.String())
+
+	impl := controller.NewContext(context.TODO(), r, controller.ControllerOptions{
+		WorkQueueName: gvr.String(),
+		Logger:        r.Logger,
+	})
 
 	r.Logger.Info("Setting up event handlers")
 
@@ -146,7 +150,8 @@ func (c *Reconciler) Reconcile(ctx context.Context, key string) error {
 		// Delete any Image resources for the current version.
 		propPolicy := metav1.DeletePropagationForeground
 		err := c.cachingclient.CachingV1alpha1().Images(namespace).DeleteCollection(
-			&metav1.DeleteOptions{PropagationPolicy: &propPolicy},
+			context.TODO(),
+			metav1.DeleteOptions{PropagationPolicy: &propPolicy},
 			metav1.ListOptions{LabelSelector: kmeta.MakeGenerationLabelSelector(thing).String()},
 		)
 		if err != nil {
@@ -157,7 +162,8 @@ func (c *Reconciler) Reconcile(ctx context.Context, key string) error {
 	// Delete any Image resource for older versions.
 	propPolicy := metav1.DeletePropagationForeground
 	return c.cachingclient.CachingV1alpha1().Images(namespace).DeleteCollection(
-		&metav1.DeleteOptions{PropagationPolicy: &propPolicy},
+		context.TODO(),
+		metav1.DeleteOptions{PropagationPolicy: &propPolicy},
 		metav1.ListOptions{LabelSelector: kmeta.MakeOldGenerationLabelSelector(thing).String()},
 	)
 }
@@ -222,7 +228,7 @@ func (c *Reconciler) reconcileMissingImages(ctx context.Context, thing *v1alpha1
 	// Create all of the missing Image resources.
 	for _, key := range order {
 		img := want[key]
-		_, err := c.cachingclient.CachingV1alpha1().Images(img.Namespace).Create(&img)
+		_, err := c.cachingclient.CachingV1alpha1().Images(img.Namespace).Create(context.TODO(), &img, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}

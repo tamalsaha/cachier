@@ -23,19 +23,19 @@ import (
 	"strings"
 	"time"
 
-	cachingclientset "github.com/knative/caching/pkg/client/clientset/versioned"
-	cachinginformers "github.com/knative/caching/pkg/client/informers/externalversions"
-	"github.com/knative/pkg/apis/duck"
-	"github.com/knative/pkg/controller"
-	"github.com/knative/pkg/logging"
-	"github.com/knative/pkg/signals"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	cachingclientset "knative.dev/caching/pkg/client/clientset/versioned"
+	cachinginformers "knative.dev/caching/pkg/client/informers/externalversions"
+	"knative.dev/pkg/apis/duck"
+	"knative.dev/pkg/controller"
+	"knative.dev/pkg/logging"
+	"knative.dev/pkg/signals"
 
-	"github.com/mattmoor/cachier/pkg/apis/podspec/v1alpha1"
-	"github.com/mattmoor/cachier/pkg/reconciler/cachier"
+	"github.com/tamalsaha/cachier/pkg/apis/podspec/v1alpha1"
+	"github.com/tamalsaha/cachier/pkg/reconciler/cachier"
 )
 
 const (
@@ -110,7 +110,7 @@ func main() {
 		go func(ctrlr *controller.Impl) {
 			// We don't expect this to return until stop is called,
 			// but if it does, propagate it back.
-			if err := ctrlr.Run(threadsPerController, stopCh); err != nil {
+			if err := ctrlr.RunContext(context.TODO(), threadsPerController); err != nil {
 				logger.Fatalf("Error running controller: %s", err.Error())
 			}
 		}(ctrlr)
